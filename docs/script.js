@@ -6,7 +6,7 @@ const gameDatabase = {
   horror: [
     {
       title: "The Mimic",
-      image: "https://placehold.co/600x400/111827/38bdf8?text=The+Mimic",
+      image: "https://static.wikia.nocookie.net/mimic/images/f/f6/Netamoicon1.png/revision/latest?cb=20260107085122",
       description:
         "A Japanese folklore-inspired horror experience.",
       review:
