@@ -10,7 +10,6 @@ API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 app = FastAPI()
 
-# This lets your local webpage talk directly to this Python code
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
