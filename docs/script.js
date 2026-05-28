@@ -288,3 +288,95 @@ function findGames() {
 ========================= */
 
 window.findGames = findGames;
+
+// Charles' script
+const inputField = document.getElementById("user-input");
+const outputArea = document.getElementById("output-area");
+const sendBtn = document.getElementById("send-btn");
+
+sendBtn.addEventListener("click", talkToBackend);
+
+inputField.addEventListener("keypress", (e) => {
+    if(e.key === "Enter"){
+        talkToBackend();
+    }
+});
+
+async function talkToBackend(){
+
+    const prompt = inputField.value.trim();
+
+    if(!prompt) return;
+
+    // Display user message
+    outputArea.innerHTML += `
+        <div class="message user">
+            <b>You:</b> ${prompt}
+        </div>
+    `;
+
+    outputArea.scrollTop = outputArea.scrollHeight;
+
+    inputField.value = "";
+
+    // Loading message
+    const loadingId = "loading-" + Date.now();
+
+    outputArea.innerHTML += `
+        <div class="message ai loading" id="${loadingId}">
+            AI is thinking...
+        </div>
+    `;
+
+    outputArea.scrollTop = outputArea.scrollHeight;
+
+    try{
+
+        const API_URL = "https://turbo-meme-5gq6wpq7r6v27q9-8000.app.github.dev";
+
+        const response = await fetch(`${API_URL}/api/chat`, {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                prompt:prompt
+            })
+        });
+
+        const data = await response.json();
+
+        // Remove loading
+        document.getElementById(loadingId).remove();
+
+        if(response.ok){
+
+            outputArea.innerHTML += `
+                <div class="message ai">
+                    <b>AI:</b> ${data.answer}
+                </div>
+            `;
+
+        } else {
+
+            outputArea.innerHTML += `
+                <div class="message error">
+                    <b>Error:</b> ${data.detail}
+                </div>
+            `;
+        }
+
+    } catch(err){
+
+        document.getElementById(loadingId).remove();
+
+        outputArea.innerHTML += `
+            <div class="message error">
+                <b>Connection Error:</b>
+                Backend server not running.
+            </div>
+        `;
+    }
+
+    outputArea.scrollTop = outputArea.scrollHeight;
+}
