@@ -286,16 +286,20 @@ function createGameCard(game: Game): HTMLDivElement {
 ========================= */
 
 function findGames(): void {
+  // Get selected genre
   const select =
     document.getElementById("genreSelect") as HTMLSelectElement;
 
+  const genre = select.value;
+
+  // Get results container
   const results =
     document.getElementById("results") as HTMLElement;
 
-  const genre = select.value;
+  // Clear old cards
+  results.innerHTML = "";
 
-  clearResults();
-
+  // If no genre selected
   if (!genre) {
     results.innerHTML = `
       <p class="empty">
@@ -305,24 +309,43 @@ function findGames(): void {
     return;
   }
 
+  // Get games ONLY from selected genre
   const games = gameDatabase[genre];
 
+  // If genre has no games
   if (!games || games.length === 0) {
     results.innerHTML = `
       <p class="empty">
-        No games found for this genre.
+        No games found.
       </p>
     `;
     return;
   }
 
-  games
-    .sort((a, b) => a.title.localeCompare(b.title))
-    .forEach((game: Game) => {
-      const card = createGameCard(game);
-      results.appendChild(card);
-    });
+  // Create cards ONLY for selected genre
+  games.forEach((game: Game) => {
+    const card = document.createElement("div");
+
+    card.className = "card";
+
+    card.innerHTML = `
+      <img src="${game.image}" alt="${game.title}">
+
+      <div class="card-content">
+        <h2>${game.title}</h2>
+
+        <p>${game.description}</p>
+
+        <a href="${game.link}" target="_blank">
+          Play Game
+        </a>
+      </div>
+    `;
+
+    results.appendChild(card);
+  });
 }
+
 
 /* =========================
    GITHUB PAGES FIX
