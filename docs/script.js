@@ -420,11 +420,11 @@ const gameDatabase = {
       description:
         "A large-scale military tactical shooter where teamwork, strategy, and skill determine success.",
       review:
-        " stars.",
-      pros: ["", ""],
-      cons: ["", ""],
+        "4.6 stars. Highly recommended that you check out this game if you love shooter and military roleplay games.",
+      pros: ["Massive open world", "Lots of gun customization"],
+      cons: ["Graphics can make your computer lag", "AI can be buggy"],
       advice:
-        "",
+        "Get a squad to play the game with, whether you are a beginner or a veteran. Try out all of the guns in the game, each one has a different playstyle, from close quarters combat to mountain sniping.",
       link:
         "https://www.roblox.com/games/2916899287/Blackhawk-Rescue-Mission-5"
     },
@@ -432,13 +432,13 @@ const gameDatabase = {
       title: "Rise of Nations",
       image: "https://tr.rbxcdn.com/180DAY-658ac363fc76363a185c8e77355b1976/768/432/Image/Webp/noFilter",
       description:
-        "",
+        "Modern world domination strategy game with deep mechanics and many playstyles.",
       review:
-        " stars.",
-      pros: ["", ""],
-      cons: ["", ""],
+        "4.8 stars. ",
+      pros: ["Different modes of combat (army and navy and air)", "Very fun with friends (but you should not team)"],
+      cons: ["Hard for beginners", "Lots of complicated mechanics"],
       advice:
-        "",
+        "USA is the best country, because it's so isolated from other countries and starts up with a large population, democratic ideology, and insane tax income. However, USA has an XP requirement to make sure that newbies can not play the country.",
       link:
         "https://www.roblox.com/games/2569453732/Rise-of-Nations"
     },
@@ -446,9 +446,9 @@ const gameDatabase = {
       title: "RB World 5",
       image: "https://tr.rbxcdn.com/180DAY-9153df39b76d398c24535b0d99fe8363/500/280/Image/Jpeg/noFilter",
       description:
-        "",
+        "A semi-realistic basketball game in Roblox.",
       review:
-        " stars.",
+        "4.7 stars. Very addicting game that can make you fall in love with basketball.",
       pros: ["", ""],
       cons: ["", ""],
       advice:
@@ -463,8 +463,8 @@ const gameDatabase = {
         "",
       review:
         " stars.",
-      pros: ["", ""],
-      cons: ["", ""],
+      pros: ["Can still beat pay to win classes", ""],
+      cons: ["Kind of pay to win", ""],
       advice:
         "https://www.roblox.com/games/5041144419/SCP-Roleplay",
       link:

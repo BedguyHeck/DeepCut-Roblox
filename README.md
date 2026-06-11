@@ -9,7 +9,6 @@ This chatbot specializes in finding underrated gems in Roblox using the genre yo
 
 2. How to run it locally:
 Go to this website: https://bedguyheck.github.io/DeepCut-Roblox/
-OR: Use ports
 
 
 3. Which research paper you used and how it influenced your code:
@@ -24,7 +23,7 @@ Charles Jiang: Backend (API, AI logic, output interpretation)
 Raymond Lin: Frontend (GUI, Website design, Game Library)
 
 
-Video Demo Link:
+Video Demo Link: 
 
 
 Working with an AI Agent:
