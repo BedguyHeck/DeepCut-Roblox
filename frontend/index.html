@@ -1,36 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My AI Hub</title>
-  <link rel="stylesheet" href="style.css"/>
-</head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deepcut Roblox</title>
 
+
+  <link rel="stylesheet" href="style.css">
+
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
 <body>
 
-<h1>🎮 My AI Hub</h1>
+
+<h1>Deepcut Roblox</h1>
+
 
 <nav>
-  <button class="active" data-tab="chat">AI Chat</button>
-  <button data-tab="games">Roblox Finder</button>
+  <button class="active" data-tab="chat">Game Finder</button>
+  <button data-tab="games">Game Library</button>
 </nav>
 
-<!-- CHAT -->
+
 <section id="chat" class="panel active">
   <div class="chat-box">
-
     <div id="output-area"></div>
 
+
     <form id="chat-form" class="row">
-      <input id="user-input" type="text" placeholder="Ask something..." autocomplete="off"/>
+      <input
+        id="user-input"
+        type="text"
+        placeholder="Ask something..."
+        autocomplete="off"
+      >
       <button class="send" type="submit">Send</button>
     </form>
-
   </div>
 </section>
 
-<!-- GAMES -->
+
 <section id="games" class="panel">
   <div class="search-container">
     <select id="genreSelect">
@@ -42,12 +52,17 @@
       <option value="simulator">Simulator</option>
     </select>
 
+
     <button id="searchBtn">Search</button>
   </div>
+
 
   <div id="results" class="results"></div>
 </section>
 
+
 <script src="script.js"></script>
+
+
 </body>
 </html>

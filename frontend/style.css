@@ -80,6 +80,25 @@ nav button.active {
 .ai { background: #065f46; }
 .error { background: #7f1d1d; }
 
+.ai p, .error p {
+  margin: 0 0 10px 0;
+  line-height: 1.5;
+}
+
+.ai p:last-child, .error p:last-child {
+  margin-bottom: 0;
+}
+
+.ai ul, .error ul {
+  margin: 0 0 10px 0;
+  padding-left: 20px;
+}
+
+.ai li, .error li {
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
 /* INPUT */
 .row {
   display: flex;
