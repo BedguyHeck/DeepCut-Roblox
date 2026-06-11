@@ -1,10 +1,11 @@
 import os
 import re
 import httpx
-
+import json
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Query
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -162,7 +163,40 @@ RULES:
 - Do not randomly list games unless relevant
 """
 
+@app.get("/api/thumbnail")
+async def get_thumbnail(place_id: int = Query(...)):
 
+    url = (
+        "https://thumbnails.roblox.com/v1/places/gameicons"
+        f"?placeIds={place_id}"
+        "&size=512x512"
+        "&format=Png"
+        "&isCircular=false"
+    )
+
+    try:
+
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(url)
+
+        response.raise_for_status()
+
+        data = response.json()
+
+        image_url = (
+            data.get("data", [{}])[0]
+            .get("imageUrl")
+        )
+
+        return {
+            "imageUrl": image_url
+        }
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to fetch thumbnail"
+        )
 @app.post("/api/chat")
 async def ask_ai(data: ChatInput):
 

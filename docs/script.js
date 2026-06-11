@@ -466,9 +466,9 @@ const gameDatabase = {
       pros: ["Can still beat pay to win classes", ""],
       cons: ["Kind of pay to win", ""],
       advice:
-        "https://www.roblox.com/games/5041144419/SCP-Roleplay",
+        "",
       link:
-        "https://www.roblox.com/games/15800296330/FREE-RB-World-5"
+        "https://www.roblox.com/games/5041144419/SCP-Roleplay"
     },
     {
       title: "PROJECT APEX",
@@ -548,8 +548,33 @@ const gameDatabase = {
 
 const results = document.getElementById("results");
 
+function getPlaceId(gameLink) {
 
-function findGames() {
+  const match = gameLink.match(/\/games\/(\d+)/);
+
+  return match ? match[1] : null;
+}
+
+
+async function getThumbnail(placeId) {
+
+  try {
+
+    const res = await fetch(
+      `https://turbo-meme-5gq6wpq7r6v27q9-8000.app.github.dev/api/thumbnail?place_id=${placeId}`
+    );
+
+    const data = await res.json();
+
+    return data.imageUrl;
+
+  } catch {
+
+    return null;
+
+  }
+}
+async function findGames() {
   const genre = document.getElementById("genreSelect").value;
   results.innerHTML = "";
 
@@ -568,8 +593,23 @@ function findGames() {
     card.classList.add("card");
 
 
-    const img = document.createElement("img");
-    img.src = game.image;
+  const img = document.createElement("img");
+
+  img.src =
+    `https://placehold.co/500x280/0f172a/38bdf8?text=Loading...`;
+
+  const placeId = getPlaceId(game.link);
+
+  if (placeId) {
+
+    const thumbnailUrl =
+      await getThumbnail(placeId);
+
+    if (thumbnailUrl) {
+      img.src = thumbnailUrl;
+    }
+
+  }
 
 
     img.onerror = () => {
