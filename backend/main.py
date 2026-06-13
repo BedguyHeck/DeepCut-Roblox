@@ -8,17 +8,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-
 load_dotenv()
-
 
 API_KEY = os.getenv("OPENROUTER_API_KEY")
 if not API_KEY:
     raise ValueError("OPENROUTER_API_KEY missing in .env")
 
-
 app = FastAPI()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,9 +23,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-
 
 class ChatInput(BaseModel):
     prompt: str
@@ -47,37 +40,28 @@ ROBLOX_BLACKLIST = {
     "pet simulator",
     "sols rng",
     "blade ball",
-    "Da hood",
+    "da hood",
 }
 
 
 def contains_blacklisted_game(text: str) -> bool:
     text = text.lower()
-
-
     for game in ROBLOX_BLACKLIST:
         pattern = re.compile(re.escape(game), re.IGNORECASE)
         if pattern.search(text):
             return True
-
-
     return False
 
 
 def blacklist_redirect():
     return {
         "intent": "blocked",
-        "answer": (
-            "I can’t talk about that Roblox game. "
-            "But I can recommend underrated Roblox games instead. "
-            "Tell me what genre you like (horror, RPG, survival, etc.)."
-        )
+        "answer": "I can’t talk about that Roblox game. Try asking for underrated horror, RPG, or survival games instead."
     }
 
 
 def detect_intent(text: str) -> str:
     text = text.lower()
-
 
     recommend_keywords = [
         "recommend", "suggest", "what should i play",
@@ -85,10 +69,8 @@ def detect_intent(text: str) -> str:
         "good roblox games", "play", "horror", "rpg"
     ]
 
-
     if any(k in text for k in recommend_keywords):
         return "recommend"
-
 
     return "chat"
 
@@ -96,30 +78,36 @@ def detect_intent(text: str) -> str:
 SYSTEM_PROMPT = """
 You are RobloxGameFinder AI.
 
+YOU MUST ALWAYS OUTPUT VALID JSON.
 
-ROLE:
-You are a Roblox expert focused on underrated and hidden gem games.
+Never output:
+- markdown
+- explanations
+- extra text
+- code blocks
 
+ONLY OUTPUT ONE OF THESE TWO FORMATS:
 
-CAPABILITIES:
-- Recommend REAL Roblox games only
-- Explain Roblox mechanics, updates, gameplay systems
-- Answer Roblox-related questions naturally
+1. Game recommendations:
+{
+  "games": [
+    {
+      "title": "Game Name",
+      "reason": "Why it's recommended",
+      "link": "https://www.roblox.com/games/PLACE_ID"
+    }
+  ]
+}
 
+2. Normal chat:
+{
+  "answer": "response here"
+}
 
-STRICT RULES:
-- Never invent games
-- Stay strictly inside Roblox
-- Only discuss real Roblox content
-
-
-RECOMMENDATION STYLE:
-- Prefer underrated / lesser-known games
-- Avoid mainstream games unless explicitly asked
-
-
-OUTPUT STYLE:
-- Clear, structured, and helpful
+RULES:
+- Output ONLY raw JSON
+- No formatting
+- No backticks
 """
 
 
@@ -129,42 +117,22 @@ def build_prompt(user_prompt: str, intent: str) -> str:
 User request:
 {user_prompt}
 
-
-TASK:
-Recommend ONLY real underrated Roblox games.
-
-
-RULES:
-- Do NOT invent games
-- Only use real Roblox games
-- Focus on hidden gems only
-
-
-FORMAT:
-- Title
-- Why underrated
-- What makes it special
-- Personal ranking/Online Reviews
+Return ONLY JSON list of Roblox game recommendations.
 """
     else:
         return f"""
 User question:
 {user_prompt}
 
-
-TASK:
-Answer as a Roblox expert.
-
-
-RULES:
-- Only Roblox-related answers
-- Be helpful and conversational
-- Do not randomly list games unless relevant
+Answer normally but still return JSON:
+{{
+  "answer": "your response here"
+}}
 """
+
 
 @app.get("/api/thumbnail")
 async def get_thumbnail(place_id: int = Query(...)):
-
     url = (
         "https://thumbnails.roblox.com/v1/places/gameicons"
         f"?placeIds={place_id}"
@@ -174,12 +142,10 @@ async def get_thumbnail(place_id: int = Query(...)):
     )
 
     try:
-
         async with httpx.AsyncClient(timeout=10) as client:
             response = await client.get(url)
 
         response.raise_for_status()
-
         data = response.json()
 
         image_url = (
@@ -187,31 +153,27 @@ async def get_thumbnail(place_id: int = Query(...)):
             .get("imageUrl")
         )
 
-        return {
-            "imageUrl": image_url
-        }
+        return {"imageUrl": image_url}
 
     except Exception:
         raise HTTPException(
             status_code=500,
             detail="Failed to fetch thumbnail"
         )
+
+
 @app.post("/api/chat")
 async def ask_ai(data: ChatInput):
-
 
     prompt = data.prompt.strip()
     if not prompt:
         raise HTTPException(status_code=400, detail="Prompt is empty")
 
-
     if contains_blacklisted_game(prompt):
         return blacklist_redirect()
 
-
     intent = detect_intent(prompt)
     final_prompt = build_prompt(prompt, intent)
-
 
     try:
         async with httpx.AsyncClient(timeout=30) as client:
@@ -231,19 +193,23 @@ async def ask_ai(data: ChatInput):
                 }
             )
 
-
         response.raise_for_status()
         result = response.json()
 
+        raw = result["choices"][0]["message"]["content"].strip()
 
-        answer = result["choices"][0]["message"]["content"].strip()
-
+        try:
+            parsed = json.loads(raw)
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail="AI did not return valid JSON"
+            )
 
         return {
             "intent": intent,
-            "answer": answer
+            "data": parsed
         }
-
 
     except Exception:
         raise HTTPException(status_code=500, detail="AI request failed")
