@@ -466,7 +466,7 @@ const gameDatabase = {
       pros: ["Amazing and unique classes", "Unique concept"],
       cons: ["A little difficult to learn", "Older graphics"],
       advice:
-        "Start off with the Survivalist class, but as soon as you can, switch to Hivemind when you unlock classes. Hivemind is such a beginner friendly class because you can cheese the enemies with direct enemy targeting with the Hivemind abiltiy.",
+        "Start off with the Survivalist class, but as soon as you can, switch to Hivemind when you unlock classes. Hivemind is such a beginner friendly class because you can cheese the enemies with direct enemy targeting with the Hivemind ability.",
       link:
         "https://www.roblox.com/games/13438553315/Decaying-Winter"
     },

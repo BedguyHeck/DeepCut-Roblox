@@ -8,7 +8,7 @@ GAME_DB = {
     "alone in a dark house": {"title": "Alone in a Dark House", "placeId": 164430409},
     "apeirophobia": {"title": "Apeirophobia", "placeId": 9508066933},
     "piggy": {"title": "Piggy", "placeId": 4623386862},
-    "the rake": {"title": "The Rake", "placeId": 179791497},
+    "the rake": {"title": "The Rake", "placeId": 2413927524},
     "stop it slender": {"title": "Stop it, Slender!", "placeId": 30869879},
     "murder mystery 2": {"title": "Murder Mystery 2", "placeId": 142823291},
     "arsenal": {"title": "Arsenal", "placeId": 286090429},
@@ -59,5 +59,15 @@ GAME_DB = {
     "rise of nations": {"title": "Rise of Nations", "placeId": 2569453732},
     "political tycoon": {"title": "Political Tycoon", "placeId": 5041144419},
     "my restaurant": {"title": "My Restaurant", "placeId": 4490140733},
-
+    "rb world 5": {"title": "RB World 5", "placeId": 15800296330},
+    "basketball stars 3": {"title": "Basketball Stars 3", "placeId": 15583100726},
+    "ultimate soccer": {"title": "Ultimate Soccer", "placeId": 15131312477},
+    "hoops life basketball": {"title": "Hoops Life Basketball", "placeId": 7540727946},
+    "playground basketball": {"title": "Playground Basketball", "placeId": 18474291382},
+    "super striker league": {"title": "Super Striker League", "placeId": 3360853050},
+    "skate park": {"title": "Skate Park", "placeId": 4850718823},
+    "boxing beta": {"title": "Boxing Beta", "placeId": 6804602922},
+    "football fusion 3": {"title": "Football Fusion 3", "placeId": 82866880824588},
+    "gym league": {"title": "Gym League", "placeId": 17450551531},
+    "NBA Champions Basketball": {"title": "NBA Champions Basketball", "placeId": 101271234790940}
 }
