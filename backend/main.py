@@ -82,36 +82,21 @@ You are RobloxGameFinder AI.
 Return ONLY valid JSON.
 
 TASK:
-Recommend 5 Roblox games based on the user's request.
+Recommend 5 REAL Roblox games.
 
 RULES:
-- Only use REAL Roblox games that exist on the platform
-- Prefer extremely well-known games (DOORS, Arsenal, Phantom Forces, etc.)
-- NEVER invent game names
-- NEVER modify spelling of real games
-- Return EXACTLY 5 games
+- ONLY return game title + reason
+- DO NOT return placeId
+- DO NOT return links
+- DO NOT guess IDs
 
 FORMAT:
 {
   "games": [
     {
       "title": "Game Name",
-      "reason": "Short explanation why it's recommended"
+      "reason": "Why it's recommended"
     }
-  ]
-}
-
-EXAMPLES:
-
-User: horror games
-Response:
-{
-  "games": [
-    {"title": "DOORS", "reason": "Survival horror with entities and random rooms"},
-    {"title": "The Mimic", "reason": "Story-driven Japanese folklore horror"},
-    {"title": "Dead Silence", "reason": "Psychological horror exploration game"},
-    {"title": "Alone in a Dark House", "reason": "Mystery horror with multiple endings"},
-    {"title": "Identity Fraud", "reason": "Escape maze horror with monsters"}
   ]
 }
 """
@@ -136,12 +121,12 @@ Return JSON:
 }}
 """
 async def resolve_place_id(game_title: str) -> int | None:
-    url = "https://catalog.roblox.com/v1/search/items/details"
+    url = "https://games.roblox.com/v1/games/list"
 
     params = {
-        "Category": 9,
-        "Keyword": game_title,
-        "Limit": 10
+        "model.keyword": game_title,
+        "model.maxRows": 1,
+        "sortToken": "Relevance"
     }
 
     async with httpx.AsyncClient(timeout=10) as client:
@@ -151,18 +136,12 @@ async def resolve_place_id(game_title: str) -> int | None:
         return None
 
     data = res.json()
+    games = data.get("data", [])
 
-    items = data.get("data", [])
-    if not items:
+    if not games:
         return None
 
-    # find closest match
-    for item in items:
-        if item.get("name", "").lower() == game_title.lower():
-            return item.get("id")
-
-    # fallback: first result
-    return items[0].get("id")
+    return games[0].get("rootPlaceId")
 
 @app.get("/api/thumbnail")
 async def get_thumbnail(place_id: int = Query(...)):
@@ -252,13 +231,9 @@ async def ask_ai(data: ChatInput):
             for game in parsed["games"][:5]:
                 place_id = await resolve_place_id(game["title"])
 
+                place_id = await resolve_place_id(game["title"])
+
                 if not place_id:
-                    final_games.append({
-                        "title": game["title"],
-                        "reason": game["reason"],
-                        "placeId": None,
-                        "link": None
-                    })
                     continue
 
                 final_games.append({
