@@ -49,24 +49,8 @@ ROBLOX_BLACKLIST = {
     "blade ball",
     "Da hood",
 }
-GAME_DATABASE = {
-    "The Mimic": {
-        "placeId": 6243699076,
-        "link": "https://www.roblox.com/games/6243699076/The-Mimic"
-    },
-    "Dead Silence": {
-        "placeId": 2577040780,
-        "link": "https://www.roblox.com/games/2577040780/Dead-Silence-Horror"
-    },
-    "DOORS": {
-        "placeId": 6516141723,
-        "link": "https://www.roblox.com/games/6516141723/DOORS"
-    },
-    "Vesteria": {
-        "placeId": 2376885433,
-        "link": "https://www.roblox.com/games/2376885433/Vesteria"
-    }
-}
+
+
 def contains_blacklisted_game(text: str) -> bool:
     text = text.lower()
 
@@ -153,20 +137,13 @@ Recommend ONLY real underrated Roblox games.
 RULES:
 - Do NOT invent games
 - Only use real Roblox games
-- Focus on hidden gems only, and preferably recommend games inside of the game database.
+- Focus on hidden gems only
 
 
 FORMAT:
-Return ONLY valid JSON.
-
-{
-  "games": [
-    {
-      "title": "Game Name",
-      "reason": "short explanation"
-    }
-  ]
-}
+- Title
+- Why underrated
+- What makes it special
 - Personal ranking/Online Reviews
 """
     else:
@@ -262,29 +239,6 @@ async def ask_ai(data: ChatInput):
         answer = result["choices"][0]["message"]["content"].strip()
 
 
-        if intent == "recommend":
-
-            ai_data = json.loads(answer)
-
-            games = []
-
-            for game in ai_data["games"]:
-
-                title = game["title"]
-
-                if title in GAME_DATABASE:
-
-                    games.append({
-                        "title": title,
-                        "reason": game["reason"],
-                        "placeId": GAME_DATABASE[title]["placeId"],
-                        "link": GAME_DATABASE[title]["link"]
-                    })
-
-            return {
-                "intent": intent,
-                "games": games
-        }
         return {
             "intent": intent,
             "answer": answer
