@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+from game_db import GAME_DB  # 👈 your hardcoded database
+
 load_dotenv()
 
 API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -24,10 +26,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# =========================
+# INPUT MODEL
+# =========================
 class ChatInput(BaseModel):
     prompt: str
 
 
+# =========================
+# BLOCKLIST
+# =========================
 ROBLOX_BLACKLIST = {
     "adopt me",
     "brookhaven",
@@ -46,21 +54,21 @@ ROBLOX_BLACKLIST = {
 
 def contains_blacklisted_game(text: str) -> bool:
     text = text.lower()
-    for game in ROBLOX_BLACKLIST:
-        if re.search(re.escape(game), text, re.IGNORECASE):
-            return True
-    return False
+    return any(re.search(re.escape(game), text) for game in ROBLOX_BLACKLIST)
 
 
 def blacklist_redirect():
     return {
         "intent": "blocked",
         "data": {
-            "answer": "I can’t talk about that Roblox game. Try underrated horror, RPG, survival, or simulator games instead."
+            "answer": "I can’t talk about that Roblox game. Try horror, RPG, survival, or simulator games instead."
         }
     }
 
 
+# =========================
+# INTENT DETECTION
+# =========================
 def detect_intent(text: str) -> str:
     text = text.lower()
 
@@ -70,60 +78,65 @@ def detect_intent(text: str) -> str:
         "good roblox games", "play", "horror", "rpg"
     ]
 
-    if any(k in text for k in recommend_keywords):
-        return "recommend"
-
-    return "chat"
+    return "recommend" if any(k in text for k in recommend_keywords) else "chat"
 
 
+# =========================
+# GAME DB LOOKUP
+# =========================
+def resolve_from_db(title: str):
+    return GAME_DB.get(title.lower().strip())
+
+
+# =========================
+# SYSTEM PROMPT (IMPORTANT FIX)
+# =========================
 SYSTEM_PROMPT = """
 You are RobloxGameFinder AI.
 
 You ONLY return valid JSON.
 
-FOR GAME RECOMMENDATIONS:
-Return ONLY this format:
+TASK:
+Pick games ONLY from the allowed list provided by the user.
 
+RULES:
+- NEVER invent game titles
+- NEVER invent placeIds
+- ONLY return titles from the provided list
+- Return exactly 5 games if possible
+
+FORMAT:
 {
   "games": [
     {
       "title": "Game Name",
-      "reason": "Why it's recommended",
-      "placeId": 123456789
+      "reason": "Why it's recommended"
     }
   ]
 }
-
-RULES:
-- Output ONLY JSON (no markdown, no text)
-- ONLY real Roblox games
-- NEVER invent placeIds
-- If unsure, choose well-known popular Roblox games
-- DO NOT generate links
-- DO NOT guess IDs
 """
 
 
-def build_prompt(user_prompt: str, intent: str) -> str:
-    if intent == "recommend":
-        return f"""
+# =========================
+# BUILD PROMPT (NOW INJECT DB)
+# =========================
+def build_prompt(user_prompt: str) -> str:
+    available_games = list(GAME_DB.keys())
+
+    return f"""
 User request:
 {user_prompt}
 
-Return ONLY JSON with real Roblox games and REAL placeIds.
-"""
-    else:
-        return f"""
-User question:
-{user_prompt}
+You MUST ONLY choose from this list of games:
+{available_games}
 
-Return JSON:
-{{
-  "answer": "your response here"
-}}
+Return ONLY JSON with titles and reasons.
 """
 
 
+# =========================
+# THUMBNAIL API
+# =========================
 @app.get("/api/thumbnail")
 async def get_thumbnail(place_id: int = Query(...)):
     url = (
@@ -136,19 +149,21 @@ async def get_thumbnail(place_id: int = Query(...)):
 
     try:
         async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(url)
+            res = await client.get(url)
+        res.raise_for_status()
 
-        response.raise_for_status()
-        data = response.json()
-
+        data = res.json()
         image_url = data.get("data", [{}])[0].get("imageUrl")
 
         return {"imageUrl": image_url}
 
     except Exception:
-        raise HTTPException(status_code=500, detail="Failed to fetch thumbnail")
+        raise HTTPException(status_code=500, detail="Thumbnail fetch failed")
 
 
+# =========================
+# MAIN CHAT ENDPOINT
+# =========================
 @app.post("/api/chat")
 async def ask_ai(data: ChatInput):
 
@@ -160,7 +175,16 @@ async def ask_ai(data: ChatInput):
         return blacklist_redirect()
 
     intent = detect_intent(prompt)
-    final_prompt = build_prompt(prompt, intent)
+
+    if intent != "recommend":
+        return {
+            "intent": "chat",
+            "data": {
+                "answer": "Ask me for Roblox game recommendations (horror, RPG, shooter, survival, etc.)"
+            }
+        }
+
+    final_prompt = build_prompt(prompt)
 
     try:
         async with httpx.AsyncClient(timeout=30) as client:
@@ -184,21 +208,31 @@ async def ask_ai(data: ChatInput):
         result = response.json()
 
         raw = result["choices"][0]["message"]["content"].strip()
+        parsed = json.loads(raw)
 
-        try:
-            parsed = json.loads(raw)
-        except Exception:
-            raise HTTPException(status_code=500, detail="AI did not return valid JSON")
+        # =========================
+        # MAP TO DATABASE (KEY FIX)
+        # =========================
+        final_games = []
 
-        # 🔥 FIX: build safe Roblox links here (no hallucination possible)
-        if "games" in parsed:
-            for game in parsed["games"]:
-                if "placeId" in game:
-                    game["link"] = f"https://www.roblox.com/games/{game['placeId']}"
+        for game in parsed.get("games", []):
+            db_entry = resolve_from_db(game["title"])
+
+            if not db_entry:
+                continue
+
+            final_games.append({
+                "title": db_entry["title"],
+                "reason": game["reason"],
+                "placeId": db_entry["placeId"],
+                "link": f"https://www.roblox.com/games/{db_entry['placeId']}"
+            })
 
         return {
             "intent": intent,
-            "data": parsed
+            "data": {
+                "games": final_games
+            }
         }
 
     except Exception:
