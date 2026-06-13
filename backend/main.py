@@ -3,9 +3,8 @@ import re
 import httpx
 import json
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Query
 from pydantic import BaseModel
 from dotenv import load_dotenv
 

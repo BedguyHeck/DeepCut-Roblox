@@ -588,7 +588,7 @@ async function findGames() {
   const games = gameDatabase[genre] || [];
 
 
-  games.forEach(game => {
+  for (const game of games) {
     const card = document.createElement("div");
     card.classList.add("card");
 
@@ -639,7 +639,7 @@ async function findGames() {
 
 
     results.appendChild(card);
-  });
+  };
 }
 
 
