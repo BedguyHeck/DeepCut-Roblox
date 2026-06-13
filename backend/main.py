@@ -79,28 +79,21 @@ def detect_intent(text: str) -> str:
 SYSTEM_PROMPT = """
 You are RobloxGameFinder AI.
 
-You ONLY return valid JSON.
-
-FOR GAME RECOMMENDATIONS:
-Return ONLY this format:
+Return ONLY JSON:
 
 {
   "games": [
     {
       "title": "Game Name",
-      "reason": "Why it's recommended",
-      "placeId": 123456789
+      "reason": "Why it's recommended"
     }
   ]
 }
 
 RULES:
-- Output ONLY JSON (no markdown, no text)
-- ONLY real Roblox games
-- NEVER invent placeIds
-- If unsure, choose well-known popular Roblox games
-- DO NOT generate links
-- DO NOT guess IDs
+- NEVER output placeId
+- NEVER output links
+- ONLY real Roblox game names
 """
 
 
@@ -110,7 +103,7 @@ def build_prompt(user_prompt: str, intent: str) -> str:
 User request:
 {user_prompt}
 
-Return ONLY JSON with real Roblox games and REAL placeIds.
+Return ONLY JSON with real Roblox game titles and reasons.
 """
     else:
         return f"""
@@ -122,7 +115,26 @@ Return JSON:
   "answer": "your response here"
 }}
 """
+async def resolve_place_id(game_title: str) -> int | None:
+    search_url = "https://games.roblox.com/v1/games/list"
 
+    params = {
+        "model.keyword": game_title,
+        "model.maxRows": 1
+    }
+
+    async with httpx.AsyncClient(timeout=10) as client:
+        res = await client.get(search_url, params=params)
+
+    if res.status_code != 200:
+        return None
+
+    data = res.json()
+
+    try:
+        return data["data"][0]["rootPlaceId"]
+    except Exception:
+        return None
 
 @app.get("/api/thumbnail")
 async def get_thumbnail(place_id: int = Query(...)):
@@ -188,13 +200,33 @@ async def ask_ai(data: ChatInput):
         try:
             parsed = json.loads(raw)
         except Exception:
-            raise HTTPException(status_code=500, detail="AI did not return valid JSON")
+            raise HTTPException(
+                status_code=500,
+                detail="AI did not return valid JSON"
+            )
 
-        # 🔥 FIX: build safe Roblox links here (no hallucination possible)
+        # ===============================
+        # ✅ ROBLOX PLACE ID RESOLUTION STEP
+        # ===============================
+
+        final_games = []
+
         if "games" in parsed:
-            for game in parsed["games"]:
-                if "placeId" in game:
-                    game["link"] = f"https://www.roblox.com/games/{game['placeId']}"
+            for game in parsed["games"][:5]:
+                place_id = await resolve_place_id(game["title"])
+
+                if not place_id:
+                    continue
+
+                final_games.append({
+                    "title": game["title"],
+                    "reason": game["reason"],
+                    "placeId": place_id,
+                    "link": f"https://www.roblox.com/games/{place_id}"
+                })
+
+            parsed["games"] = final_games
+
 
         return {
             "intent": intent,
