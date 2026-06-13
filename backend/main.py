@@ -136,27 +136,33 @@ Return JSON:
 }}
 """
 async def resolve_place_id(game_title: str) -> int | None:
-    search_url = "https://games.roblox.com/v1/games/list"
+    url = "https://catalog.roblox.com/v1/search/items/details"
 
     params = {
-        "model.keyword": game_title,
-        "model.maxRows": 1,
-        "sortToken": "Relevance"
+        "Category": 9,
+        "Keyword": game_title,
+        "Limit": 10
     }
 
     async with httpx.AsyncClient(timeout=10) as client:
-        res = await client.get(search_url, params=params)
+        res = await client.get(url, params=params)
 
     if res.status_code != 200:
         return None
 
     data = res.json()
 
-    games = data.get("data", [])
-    if not games:
+    items = data.get("data", [])
+    if not items:
         return None
 
-    return games[0].get("rootPlaceId")
+    # find closest match
+    for item in items:
+        if item.get("name", "").lower() == game_title.lower():
+            return item.get("id")
+
+    # fallback: first result
+    return items[0].get("id")
 
 @app.get("/api/thumbnail")
 async def get_thumbnail(place_id: int = Query(...)):
