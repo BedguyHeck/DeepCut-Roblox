@@ -1,60 +1,63 @@
 # game_db.py
 
 GAME_DB = {
-    "arsenal": {
-        "title": "Arsenal",
-        "placeId": 286090429
-    },
-    "phantom forces": {
-        "title": "Phantom Forces",
-        "placeId": 292439477
-    },
-    "bad business": {
-        "title": "Bad Business",
-        "placeId": 3233893879
-    },
-    "counter blox": {
-        "title": "Counter Blox: Roblox Offensive",
-        "placeId": 301549746
-    },
-    "doors": {
-        "title": "DOORS",
-        "placeId": 6516141723
-    },
-    "the mimic": {
-        "title": "The Mimic",
-        "placeId": 6243699076
-    },
-    "dead silence": {
-        "title": "Dead Silence",
-        "placeId": 21532277
-    },
-    "alone in a dark house": {
-        "title": "Alone in a Dark House",
-        "placeId": 83342318
-    },
-    "identity fraud": {
-        "title": "Identity Fraud",
-        "placeId": 338521019
-    },
-    "natural disaster survival": {
-        "title": "Natural Disaster Survival",
-        "placeId": 189707
-    },
-    "bee swarm simulator": {
-        "title": "Bee Swarm Simulator",
-        "placeId": 1537690962
-    },
-    "pet simulator 99": {
-        "title": "Pet Simulator 99",
-        "placeId": 8737899170
-    },
-    "3008": {
-        "title": "3008",
-        "placeId": 2768379856
-    },
-    "arsenal roblox": {
-        "title": "Arsenal",
-        "placeId": 286090429
-    }
+    "doors": {"title": "DOORS", "placeId": 6516141723},
+    "the mimic": {"title": "The Mimic", "placeId": 6243699076},
+    "dead silence": {"title": "Dead Silence", "placeId": 233469185},
+    "identity fraud": {"title": "Identity Fraud", "placeId": 338521019},
+    "alone in a dark house": {"title": "Alone in a Dark House", "placeId": 452319057},
+    "apeirophobia": {"title": "Apeirophobia", "placeId": 9508066933},
+    "piggy": {"title": "Piggy", "placeId": 4623386862},
+    "the rake": {"title": "The Rake", "placeId": 179791497},
+    "stop it slender": {"title": "Stop it, Slender!", "placeId": 30869879},
+    "murder mystery 2": {"title": "Murder Mystery 2", "placeId": 142823291},
+    "arsenal": {"title": "Arsenal", "placeId": 286090429},
+    "phantom forces": {"title": "Phantom Forces", "placeId": 292439477},
+    "bad business": {"title": "Bad Business", "placeId": 3233893879},
+    "counter blox": {"title": "Counter Blox", "placeId": 301549746},
+    "energy assault": {"title": "Energy Assault", "placeId": 6172932937},
+    "polybattle": {"title": "Polybattle", "placeId": 5602055394},
+    "frontlines": {"title": "Frontlines", "placeId": 5938036553},
+    "big paintball": {"title": "Big Paintball", "placeId": 3527629287},
+    "weaponry": {"title": "Weaponry", "placeId": 2534724415},
+    "zombie uprising": {"title": "Zombie Uprising", "placeId": 5041144419},
+    "3008": {"title": "3008", "placeId": 2768379856},
+    "natural disaster survival": {"title": "Natural Disaster Survival", "placeId": 189707},
+    "lone survival": {"title": "Lone Survival", "placeId": 23578803},
+    "the wild west": {"title": "The Wild West", "placeId": 2317712696},
+    "booga booga": {"title": "Booga Booga", "placeId": 1335695570},
+    "daybreak 2": {"title": "Daybreak 2", "placeId": 45090927},
+    "scp roleplay": {"title": "SCP Roleplay", "placeId": 5041144419},
+    "project lazarus zombies": {"title": "Project Lazarus Zombies", "placeId": 394506555},
+    "bee swarm simulator": {"title": "Bee Swarm Simulator", "placeId": 1537690962},
+    "pet simulator 99": {"title": "Pet Simulator 99", "placeId": 8737899170},
+    "pet simulator x": {"title": "Pet Simulator X", "placeId": 6284583030},
+    "mining simulator": {"title": "Mining Simulator", "placeId": 1418408667},
+    "lumber tycoon 2": {"title": "Lumber Tycoon 2", "placeId": 13822889},
+    "vehicle simulator": {"title": "Vehicle Simulator", "placeId": 171391948},
+    "theme park tycoon 2": {"title": "Theme Park Tycoon 2", "placeId": 69184822},
+    "restaurant tycoon 2": {"title": "Restaurant Tycoon 2", "placeId": 3398014311},
+    "airport tycoon": {"title": "Airport Tycoon", "placeId": 338227062},
+    "fish simulator": {"title": "Fish Simulator", "placeId": 734641663},
+    "vesteria": {"title": "Vesteria", "placeId": 2376885433},
+    "deepwoken": {"title": "Deepwoken", "placeId": 4111023553},
+    "dungeon quest": {"title": "Dungeon Quest", "placeId": 2414851778},
+    "world zero": {"title": "World // Zero", "placeId": 2727067538},
+    "rogue lineage": {"title": "Rogue Lineage", "placeId": 3016661674},
+    "arcane odyssey": {"title": "Arcane Odyssey", "placeId": 3272915504},
+    "anime fighting simulator": {"title": "Anime Fighting Simulator", "placeId": 1164958299},
+    "grand piece online": {"title": "Grand Piece Online", "placeId": 1730877806},
+    "project slayers": {"title": "Project Slayers", "placeId": 5956785391},
+    "shindo life": {"title": "Shindo Life", "placeId": 4616652839},
+    "retail tycoon 2": {"title": "Retail Tycoon 2", "placeId": 5865858426},
+    "pizza place": {"title": "Work at a Pizza Place", "placeId": 192800},
+    "build a boat": {"title": "Build A Boat For Treasure", "placeId": 537413528},
+    "adopt and raise a cute baby": {"title": "Adopt and Raise a Cute Baby", "placeId": 383310974},
+    "plane crazy": {"title": "Plane Crazy", "placeId": 166986752},
+    "car crushers 2": {"title": "Car Crushers 2", "placeId": 654732683},
+    "super power training simulator": {"title": "Super Power Training Simulator", "placeId": 155382109},
+    "rise of nations": {"title": "Rise of Nations", "placeId": 2569453732},
+    "political tycoon": {"title": "Political Tycoon", "placeId": 5041144419},
+    "my restaurant": {"title": "My Restaurant", "placeId": 4490140733},
+    
 }
