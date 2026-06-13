@@ -47,8 +47,7 @@ ROBLOX_BLACKLIST = {
 def contains_blacklisted_game(text: str) -> bool:
     text = text.lower()
     for game in ROBLOX_BLACKLIST:
-        pattern = re.compile(re.escape(game), re.IGNORECASE)
-        if pattern.search(text):
+        if re.search(re.escape(game), text, re.IGNORECASE):
             return True
     return False
 
@@ -56,7 +55,9 @@ def contains_blacklisted_game(text: str) -> bool:
 def blacklist_redirect():
     return {
         "intent": "blocked",
-        "answer": "I can’t talk about that Roblox game. Try asking for underrated horror, RPG, or survival games instead."
+        "data": {
+            "answer": "I can’t talk about that Roblox game. Try underrated horror, RPG, survival, or simulator games instead."
+        }
     }
 
 
@@ -78,37 +79,28 @@ def detect_intent(text: str) -> str:
 SYSTEM_PROMPT = """
 You are RobloxGameFinder AI.
 
-YOU ARE A STRICT JSON GENERATOR.
+You ONLY return valid JSON.
 
-UNDER NO CIRCUMSTANCES may you output normal text.
+FOR GAME RECOMMENDATIONS:
+Return ONLY this format:
 
-If you fail, the system will reject your response.
-
-OUTPUT RULES (ABSOLUTE):
-
-- Output MUST be valid JSON
-- Output MUST start with { and end with }
-- No markdown
-- No explanations
-- No extra text before or after JSON
-
-VALID OUTPUT TYPES:
-
-TYPE 1 (recommendation):
 {
   "games": [
     {
-      "title": "string",
-      "reason": "string",
-      "link": "https://www.roblox.com/games/PLACE_ID"
+      "title": "Game Name",
+      "reason": "Why it's recommended",
+      "placeId": 123456789
     }
   ]
 }
 
-TYPE 2 (chat):
-{
-  "answer": "string"
-}
+RULES:
+- Output ONLY JSON (no markdown, no text)
+- ONLY real Roblox games
+- NEVER invent placeIds
+- If unsure, choose well-known popular Roblox games
+- DO NOT generate links
+- DO NOT guess IDs
 """
 
 
@@ -118,14 +110,14 @@ def build_prompt(user_prompt: str, intent: str) -> str:
 User request:
 {user_prompt}
 
-Return ONLY JSON list of Roblox game recommendations.
+Return ONLY JSON with real Roblox games and REAL placeIds.
 """
     else:
         return f"""
 User question:
 {user_prompt}
 
-Answer normally but still return JSON:
+Return JSON:
 {{
   "answer": "your response here"
 }}
@@ -149,18 +141,12 @@ async def get_thumbnail(place_id: int = Query(...)):
         response.raise_for_status()
         data = response.json()
 
-        image_url = (
-            data.get("data", [{}])[0]
-            .get("imageUrl")
-        )
+        image_url = data.get("data", [{}])[0].get("imageUrl")
 
         return {"imageUrl": image_url}
 
     except Exception:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to fetch thumbnail"
-        )
+        raise HTTPException(status_code=500, detail="Failed to fetch thumbnail")
 
 
 @app.post("/api/chat")
@@ -202,10 +188,13 @@ async def ask_ai(data: ChatInput):
         try:
             parsed = json.loads(raw)
         except Exception:
-            raise HTTPException(
-                status_code=500,
-                detail="AI did not return valid JSON"
-            )
+            raise HTTPException(status_code=500, detail="AI did not return valid JSON")
+
+        # 🔥 FIX: build safe Roblox links here (no hallucination possible)
+        if "games" in parsed:
+            for game in parsed["games"]:
+                if "placeId" in game:
+                    game["link"] = f"https://www.roblox.com/games/{game['placeId']}"
 
         return {
             "intent": intent,
