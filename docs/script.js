@@ -22,66 +22,29 @@ const form = document.getElementById("chat-form");
 
 
 function addMessage(text, type) {
+
   const div = document.createElement("div");
   div.classList.add("message", type);
 
+  if (type === "recommend") {
 
-  if (type === "ai" || type === "error") {
-    div.innerHTML = marked.parse(text.replace(/\\n/g, "\n"));
+    div.innerHTML = text;
+
+  } else if (type === "ai" || type === "error") {
+
+    div.innerHTML = marked.parse(
+      text.replace(/\\n/g, "\n")
+    );
+
   } else {
-    div.textContent = text;
-  }
 
+    div.textContent = text;
+
+  }
 
   output.appendChild(div);
   output.scrollTop = output.scrollHeight;
 }
-
-
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-
-  const prompt = input.value.trim();
-  if (!prompt) return;
-
-
-  addMessage(`You: ${prompt}`, "user");
-  input.value = "";
-
-
-  const loading = document.createElement("div");
-  loading.classList.add("message", "ai");
-  loading.textContent = "AI is thinking...";
-  output.appendChild(loading);
-
-
-  try {
-    const res = await fetch("https://deepcut-roblox.onrender.com/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
-    });
-
-
-    const data = await res.json();
-    loading.remove();
-
-
-    if (res.ok) {
-      addMessage(data.answer, "ai");
-    } else {
-      addMessage(data.detail || "Error", "error");
-    }
-
-
-  } catch {
-    loading.remove();
-    addMessage("Backend not running", "error");
-  }
-});
-
-
 const gameDatabase = {
   horror: [
     {
@@ -573,6 +536,57 @@ async function getThumbnail(placeId) {
     return null;
 
   }
+}
+async function renderRecommendedGames(games) {
+
+  let html = "";
+
+  for (const game of games) {
+
+    let thumbnailUrl =
+      "https://placehold.co/500x280/0f172a/38bdf8?text=No+Image";
+
+    if (game.placeId) {
+
+      const fetchedThumbnail =
+        await getThumbnail(game.placeId);
+
+      if (fetchedThumbnail) {
+        thumbnailUrl = fetchedThumbnail;
+      }
+
+    }
+
+    html += `
+      <div class="card">
+
+        <img
+          src="${thumbnailUrl}"
+          alt="${game.title}"
+        >
+
+        <div class="card-content">
+
+          <h2>${game.title}</h2>
+
+          <p class="desc">
+            ${game.reason}
+          </p>
+
+          <a
+            href="${game.link}"
+            target="_blank"
+          >
+            Play
+          </a>
+
+        </div>
+
+      </div>
+    `;
+  }
+
+  addMessage(html, "recommend");
 }
 async function findGames() {
   const genre = document.getElementById("genreSelect").value;
