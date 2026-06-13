@@ -85,10 +85,11 @@ TASK:
 Recommend 5 Roblox games based on the user's request.
 
 RULES:
-- ALWAYS return exactly 5 games (never empty)
-- Only real Roblox games that actually exist
-- Do NOT include placeId
-- Do NOT include links
+- Only use REAL Roblox games that exist on the platform
+- Prefer extremely well-known games (DOORS, Arsenal, Phantom Forces, etc.)
+- NEVER invent game names
+- NEVER modify spelling of real games
+- Return EXACTLY 5 games
 
 FORMAT:
 {
@@ -139,7 +140,8 @@ async def resolve_place_id(game_title: str) -> int | None:
 
     params = {
         "model.keyword": game_title,
-        "model.maxRows": 1
+        "model.maxRows": 1,
+        "sortToken": "Relevance"
     }
 
     async with httpx.AsyncClient(timeout=10) as client:
@@ -150,10 +152,11 @@ async def resolve_place_id(game_title: str) -> int | None:
 
     data = res.json()
 
-    try:
-        return data["data"][0]["rootPlaceId"]
-    except Exception:
+    games = data.get("data", [])
+    if not games:
         return None
+
+    return games[0].get("rootPlaceId")
 
 @app.get("/api/thumbnail")
 async def get_thumbnail(place_id: int = Query(...)):
@@ -223,6 +226,15 @@ async def ask_ai(data: ChatInput):
                 status_code=500,
                 detail="AI did not return valid JSON"
             )
+        # fallback safety (PREVENT EMPTY RESPONSES)
+        if "games" not in parsed or not parsed["games"]:
+            parsed["games"] = [
+                {"title": "DOORS", "reason": "Popular horror survival game"},
+                {"title": "Arsenal", "reason": "Fast-paced shooter"},
+                {"title": "Murder Mystery 2", "reason": "Classic social deduction"},
+                {"title": "The Mimic", "reason": "Story-driven horror experience"},
+                {"title": "BedWars", "reason": "Team PvP combat game"}
+            ]
 
         # ===============================
         # ✅ ROBLOX PLACE ID RESOLUTION STEP
@@ -235,6 +247,12 @@ async def ask_ai(data: ChatInput):
                 place_id = await resolve_place_id(game["title"])
 
                 if not place_id:
+                    final_games.append({
+                        "title": game["title"],
+                        "reason": game["reason"],
+                        "placeId": None,
+                        "link": None
+                    })
                     continue
 
                 final_games.append({
