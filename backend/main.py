@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-from game_db import GAME_DB  # 👈 your hardcoded database
+from game_db import GAME_DB
 
 load_dotenv()
 
@@ -26,16 +26,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# =========================
-# INPUT MODEL
-# =========================
 class ChatInput(BaseModel):
     prompt: str
 
 
-# =========================
-# BLOCKLIST
-# =========================
 ROBLOX_BLACKLIST = {
     "adopt me",
     "brookhaven",
@@ -66,9 +60,6 @@ def blacklist_redirect():
     }
 
 
-# =========================
-# INTENT DETECTION
-# =========================
 def detect_intent(text: str) -> str:
     text = text.lower()
 
@@ -81,15 +72,12 @@ def detect_intent(text: str) -> str:
     return "recommend" if any(k in text for k in recommend_keywords) else "chat"
 
 
-# =========================
-# GAME DB LOOKUP
-# =========================
 def resolve_from_db(title: str):
     return GAME_DB.get(title.lower().strip())
 
 
 # =========================
-# SYSTEM PROMPT (IMPORTANT FIX)
+# UPDATED SYSTEM PROMPT
 # =========================
 SYSTEM_PROMPT = """
 You are RobloxGameFinder AI.
@@ -97,12 +85,12 @@ You are RobloxGameFinder AI.
 You ONLY return valid JSON.
 
 TASK:
-Pick games ONLY from the allowed list provided by the user.
+Pick games ONLY from the allowed list provided.
 
 RULES:
 - NEVER invent game titles
 - NEVER invent placeIds
-- ONLY return titles from the provided list
+- ONLY return titles from allowed list
 - Return exactly 5 games if possible
 
 FORMAT:
@@ -110,15 +98,21 @@ FORMAT:
   "games": [
     {
       "title": "Game Name",
-      "reason": "Why it's recommended"
+      "reason": "Why it's recommended",
+      "rating": 8.5
     }
   ]
 }
+
+RULES FOR RATING:
+- rating must be a number from 1 to 10
+- can include decimals (example 7.8, 9.2)
+- be realistic based on popularity/quality
 """
 
 
 # =========================
-# BUILD PROMPT (NOW INJECT DB)
+# UPDATED PROMPT BUILDER
 # =========================
 def build_prompt(user_prompt: str) -> str:
     available_games = list(GAME_DB.keys())
@@ -127,16 +121,19 @@ def build_prompt(user_prompt: str) -> str:
 User request:
 {user_prompt}
 
-You MUST ONLY choose from this list of games:
+You MUST ONLY choose from this list:
 {available_games}
 
-Return ONLY JSON with titles and reasons.
+Return ONLY JSON with:
+- title
+- reason (include rating out of 10 inside reason OR as separate field)
+- rating (1–10 float)
+
+IMPORTANT:
+Always include rating.
 """
 
 
-# =========================
-# THUMBNAIL API
-# =========================
 @app.get("/api/thumbnail")
 async def get_thumbnail(place_id: int = Query(...)):
     url = (
@@ -161,9 +158,6 @@ async def get_thumbnail(place_id: int = Query(...)):
         raise HTTPException(status_code=500, detail="Thumbnail fetch failed")
 
 
-# =========================
-# MAIN CHAT ENDPOINT
-# =========================
 @app.post("/api/chat")
 async def ask_ai(data: ChatInput):
 
@@ -210,9 +204,6 @@ async def ask_ai(data: ChatInput):
         raw = result["choices"][0]["message"]["content"].strip()
         parsed = json.loads(raw)
 
-        # =========================
-        # MAP TO DATABASE (KEY FIX)
-        # =========================
         final_games = []
 
         for game in parsed.get("games", []):
@@ -224,6 +215,7 @@ async def ask_ai(data: ChatInput):
             final_games.append({
                 "title": db_entry["title"],
                 "reason": game["reason"],
+                "rating": game.get("rating", 0),
                 "placeId": db_entry["placeId"],
                 "link": f"https://www.roblox.com/games/{db_entry['placeId']}"
             })
