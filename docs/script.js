@@ -57,7 +57,7 @@ form.addEventListener("submit", async (e) => {
 
 
   try {
-    const res = await fetch("https://turbo-meme-5gq6wpq7r6v27q9-8000.app.github.dev/api/chat", {
+    const res = await fetch("https://deepcut-roblox.onrender.com/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt })
@@ -561,7 +561,7 @@ async function getThumbnail(placeId) {
   try {
 
     const res = await fetch(
-      `https://turbo-meme-5gq6wpq7r6v27q9-8000.app.github.dev/api/thumbnail?place_id=${placeId}`
+      `https://deepcut-roblox.onrender.com/api/thumbnail?place_id=${placeId}`
     );
 
     const data = await res.json();
